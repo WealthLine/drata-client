@@ -1,0 +1,39 @@
+# Thresholds — pinned deliberately, never inherited. Denying a group whose
+# lints have configurable thresholds otherwise delegates a merge-blocking
+# decision to clippy's default constants.
+too-many-arguments-threshold = 7
+type-complexity-threshold    = 250
+excessive-nesting-threshold  = 5
+too-many-lines-threshold     = 100
+enum-variant-size-threshold  = 200
+large-error-threshold        = 128
+too-large-for-stack          = 200
+array-size-threshold         = 16384
+
+upper-case-acronyms-aggressive = false
+
+# Tests are exempt. None of these default to true; without them the config
+# fights tests hardest, which is the opposite of the intent.
+allow-unwrap-in-tests           = true
+allow-panic-in-tests            = true
+allow-indexing-slicing-in-tests = true
+allow-dbg-in-tests              = true
+allow-print-in-tests            = true
+allow-useless-vec-in-tests      = true
+
+# Lock poisoning is the one unwrap with no better answer.
+allow-unwrap-types = ["std::sync::LockResult"]
+
+# Completes panic-freedom: RefCell is a panicking API that every lint above
+# misses, and the try_ variants are drop-in. These lists grow from decisions,
+# never from speculation — and every entry must be verified to fire (see below).
+# A TOML inline table may not span lines, so these do not wrap — see below.
+disallowed-methods = [
+  { path = "std::cell::RefCell::borrow", reason = "panics if already mutably borrowed; use try_borrow" },
+  { path = "std::cell::RefCell::borrow_mut", reason = "panics if already borrowed; use try_borrow_mut" },
+]
+
+# Repo-local, beyond rust.md: names that are prose here, not code, so
+# `doc_markdown` (pedantic) does not ask for backticks around them. ".." keeps
+# clippy's default list.
+doc-valid-idents = ["..", "WealthReach", "WealthLine", "PostHog", "OpenTofu"]

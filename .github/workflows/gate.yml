@@ -1,0 +1,59 @@
+name: gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  merge_group:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Read-only: pull requests from forks run here too, and need nothing more.
+permissions:
+  contents: read
+
+jobs:
+  rust:
+    name: rust
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      - run: nix develop -c cargo fmt --check
+      - run: nix develop -c cargo clippy --all-targets --locked
+      - run: nix develop -c cargo nextest run --locked
+      - run: nix develop -c cargo test --doc --locked
+      - run: nix develop -c cargo doc --no-deps --locked
+      - run: nix develop -c cargo deny check all
+      - run: nix develop -c cargo package --locked
+
+  # The required status check. `if: always()` matters: a skipped required
+  # check reads as success.
+  gate:
+    name: gate
+    runs-on: ubuntu-latest
+    needs: [rust]
+    if: always()
+    steps:
+      - name: Every job must have succeeded
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          total=$(printf '%s' "$NEEDS" | jq -r 'length')
+          if [ -z "$total" ] || [ "$total" -eq 0 ]; then
+            echo "gate: no job results were reported" >&2
+            exit 1
+          fi
+          bad=$(printf '%s' "$NEEDS" | jq -r 'to_entries[] | select(.value.result != "success") | "\(.key)=\(.value.result)"')
+          if [ -n "$bad" ]; then
+            echo "gate: a required job did not succeed: $bad" >&2
+            exit 1
+          fi
+          echo "gate: all $total jobs succeeded"

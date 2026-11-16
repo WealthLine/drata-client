@@ -1,0 +1,12 @@
+{
+  "email": "alice@example.com",
+  "groups": [
+    {
+      "name": "Owners",
+      "role": "member"
+    }
+  ],
+  "id": "alice@example.com",
+  "name": "Alice Example",
+  "role": "admin"
+}

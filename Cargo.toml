@@ -1,0 +1,120 @@
+[package]
+name = "drata-client"
+version = "0.1.0"
+edition = "2024"
+# The support floor, raised on purpose. The build toolchain is the latest
+# stable, from flake.nix.
+rust-version = "1.99"
+description = "Client for Drata's custom connections and Access Review APIs, with full-replace sync and a keyless dry run"
+repository = "https://github.com/WealthLine/drata-client"
+license = "MIT"
+readme = "README.md"
+keywords = ["drata", "compliance", "grc", "client"]
+categories = ["api-bindings"]
+include = ["/src/**/*.rs", "/src/**/fixtures/*.json", "/README.md", "/LICENSE"]
+
+[dependencies]
+# rustls with the `ring` provider rather than reqwest's default aws-lc-rs,
+# which needs cmake and a C toolchain to build. The transport builds its own
+# TLS configuration, so no process-wide provider is installed.
+reqwest = { version = "0.13", default-features = false, features = ["rustls-no-provider", "http2"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+rustls-platform-verifier = "0.7"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+tokio = { version = "1", features = ["time"] }
+
+# The absences are deliberate: restriction and nursery are never enabled as
+# groups, only the lints listed here.
+[lints.rust]
+future_incompatible = { level = "deny", priority = -1 }
+nonstandard_style   = { level = "deny", priority = -1 }
+unused              = { level = "deny", priority = -1 }
+let_underscore      = { level = "deny", priority = -1 }
+keyword_idents      = { level = "deny", priority = -1 }
+refining_impl_trait = { level = "deny", priority = -1 }
+rust_2018_idioms    = { level = "deny", priority = -1 }
+
+unsafe_code                   = "forbid"
+missing_docs                  = "deny"
+missing_debug_implementations = "deny"
+unreachable_pub               = "deny"
+unsafe_op_in_unsafe_fn        = "deny"
+unfulfilled_lint_expectations = "deny"
+trivial_casts                 = "deny"
+trivial_numeric_casts         = "deny"
+unused_qualifications         = "deny"
+unused_lifetimes              = "deny"
+unused_import_braces          = "deny"
+macro_use_extern_crate        = "deny"
+
+[lints.clippy]
+correctness = { level = "deny", priority = -1 }
+suspicious  = { level = "deny", priority = -1 }
+complexity  = { level = "deny", priority = -1 }
+perf        = { level = "deny", priority = -1 }
+style       = { level = "deny", priority = -1 }
+pedantic    = { level = "deny", priority = -1 }
+cargo       = { level = "deny", priority = -1 }
+
+multiple_crate_versions = "allow"      # unactionable: transitive dependencies
+
+# restriction — panic-freedom
+unwrap_used        = "deny"
+panic              = "deny"
+panic_in_result_fn = "deny"
+unwrap_in_result   = "deny"
+todo               = "deny"
+unimplemented      = "deny"
+unreachable        = "deny"
+indexing_slicing   = "deny"
+get_unwrap         = "deny"
+string_slice       = "deny"
+exit               = "deny"
+
+# restriction — suppression discipline
+allow_attributes                = "deny"
+allow_attributes_without_reason = "deny"
+
+# restriction — unsafe
+undocumented_unsafe_blocks    = "deny"
+multiple_unsafe_ops_per_block = "deny"
+unnecessary_safety_comment    = "deny"
+unnecessary_safety_doc        = "deny"
+
+# restriction — debug / IO
+dbg_macro        = "deny"
+print_stdout     = "deny"
+print_stderr     = "deny"
+filetype_is_file = "deny"
+
+# restriction — silent failure
+let_underscore_must_use     = "deny"
+unused_result_ok            = "deny"
+map_err_ignore              = "deny"
+assertions_on_result_states = "deny"
+
+# restriction — footguns, numeric, tests
+rc_mutex               = "deny"
+mem_forget             = "deny"
+iter_over_hash_type    = "deny"
+float_cmp_const        = "deny"
+lossy_float_literal    = "deny"
+missing_assert_message = "deny"
+redundant_test_prefix  = "deny"
+
+# nursery cherry-picks
+path_buf_push_overwrite    = "deny"
+read_zero_byte_vec         = "deny"
+fallible_impl_from         = "deny"
+debug_assert_with_mut_call = "deny"
+collection_is_never_read   = "deny"
+needless_collect           = "deny"
+or_fun_call                = "deny"
+use_self                   = "deny"
+equatable_if_let           = "deny"
+trivial_regex              = "deny"
+
+[lints.rustdoc]
+all = { level = "deny", priority = -1 }

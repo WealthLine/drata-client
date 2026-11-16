@@ -1,0 +1,17 @@
+# stable — pinned rather than inherited, same reasoning as the clippy thresholds
+max_width                = 100
+newline_style            = "Unix"   # default "Auto" is platform-dependent
+use_field_init_shorthand = true
+
+# nightly-only — require `cargo +nightly fmt`. On stable these are SILENTLY
+# IGNORED (warning, not error), so a stable-only repo must delete them rather
+# than leave a file documenting a policy the formatter is not applying.
+group_imports                = "StdExternalCrate"
+imports_granularity          = "Crate"
+wrap_comments                = true
+comment_width                = 80
+format_code_in_doc_comments  = true
+doc_comment_code_block_width = 80   # separate knob; defaults to 100, not to
+                                    # comment_width. Without it the prose in a
+                                    # doc comment wraps at 80 and the code
+                                    # blocks inside it wrap at 100.
